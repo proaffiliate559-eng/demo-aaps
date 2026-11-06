@@ -1,0 +1,34 @@
+# Supabase CLI config for local development (`supabase start`).
+project_id = "caferepeat-ai"
+
+[api]
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+
+[db]
+port = 54322
+major_version = 15
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/auth/callback"]
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+
+[auth.sms]
+enable_signup = true
+enable_confirmations = true
+template = "Your {{ .Code }} is your CafeRepeat login code"
+# Local testing without an SMS provider: these numbers always accept the code below.
+# Remove for production and configure Twilio / MessageBird / Vonage / TextLocal in the dashboard.
+[auth.sms.test_otp]
+919811111111 = "123456"
+919822222222 = "123456"
