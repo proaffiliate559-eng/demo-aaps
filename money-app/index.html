@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0f172a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<link rel="manifest" href="manifest.json" />
+<title>Paisa – Money Manager</title>
+<style>
+  :root {
+    --bg: #f4f5f9; --card: #ffffff; --text: #0f172a; --muted: #64748b;
+    --line: #e5e7eb; --brand: #4f46e5; --brand-2: #7c3aed;
+    --green: #16a34a; --red: #e11d48; --chip: #eef0f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0b0f1a; --card: #151a28; --text: #f1f5f9; --muted: #94a3b8;
+      --line: #263042; --chip: #1e2536; }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif; }
+  .app { max-width: 440px; margin: 0 auto; min-height: 100%; padding: 16px 16px 110px;
+    padding-top: max(16px, env(safe-area-inset-top)); }
+  h1 { font-size: 22px; margin: 4px 0 16px; }
+  .hello { color: var(--muted); font-size: 14px; }
+
+  .balance { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff;
+    border-radius: 24px; padding: 22px; box-shadow: 0 12px 30px -12px rgba(79,70,229,.6); }
+  .balance small { opacity: .8; font-size: 13px; }
+  .balance .amt { font-size: 34px; font-weight: 700; margin: 6px 0 18px; letter-spacing: -.5px; }
+  .split { display: flex; gap: 12px; }
+  .split div { flex: 1; background: rgba(255,255,255,.15); border-radius: 14px; padding: 10px 12px; }
+  .split span { display: block; font-size: 12px; opacity: .85; }
+  .split b { font-size: 16px; }
+
+  .section-head { display: flex; justify-content: space-between; align-items: center; margin: 24px 0 10px; }
+  .section-head h2 { font-size: 17px; margin: 0; }
+  .section-head button { background: none; border: 0; color: var(--brand); font-weight: 600; font-size: 14px; }
+
+  .list { background: var(--card); border-radius: 20px; overflow: hidden; }
+  .tx { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .tx:last-child { border-bottom: 0; }
+  .ico { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center;
+    font-size: 20px; background: var(--chip); flex-shrink: 0; }
+  .tx .meta { flex: 1; min-width: 0; }
+  .tx .meta b { display: block; font-size: 15px; }
+  .tx .meta span { font-size: 12px; color: var(--muted); }
+  .tx .val { font-weight: 700; font-size: 15px; white-space: nowrap; }
+  .pos { color: var(--green); } .neg { color: var(--red); }
+  .empty { padding: 32px 16px; text-align: center; color: var(--muted); font-size: 14px; }
+
+  /* tabs */
+  .tabs { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card);
+    border-top: 1px solid var(--line); display: flex; justify-content: space-around; align-items: center;
+    padding: 8px 0 max(8px, env(safe-area-inset-bottom)); }
+  .tabs button { background: none; border: 0; color: var(--muted); font-size: 11px; display: flex;
+    flex-direction: column; align-items: center; gap: 2px; padding: 4px 18px; }
+  .tabs button.on { color: var(--brand); font-weight: 600; }
+  .tabs svg { width: 24px; height: 24px; }
+  .fab { width: 56px; height: 56px; border-radius: 50%; background: var(--brand) !important; color: #fff !important;
+    margin-top: -28px; box-shadow: 0 8px 20px -6px rgba(79,70,229,.7); justify-content: center; padding: 0 !important; }
+
+  .view { display: none; } .view.on { display: block; }
+
+  /* add sheet */
+  .seg { display: flex; background: var(--chip); border-radius: 14px; padding: 4px; margin-bottom: 10px; }
+  .seg button { flex: 1; border: 0; background: none; padding: 10px; border-radius: 10px; font-weight: 600;
+    color: var(--muted); font-size: 15px; }
+  .seg button.on { background: var(--card); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .bigamt { text-align: center; font-size: 44px; font-weight: 700; margin: 0; letter-spacing: -1px; }
+  .note { width: 100%; border: 1px solid var(--line); background: var(--card); color: var(--text);
+    border-radius: 12px; padding: 12px 14px; font-size: 15px; margin: 12px 0; }
+  .cats { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .cats::-webkit-scrollbar { display: none; }
+  .cat { flex-shrink: 0; border: 1px solid var(--line); background: var(--card); color: var(--text);
+    border-radius: 999px; padding: 8px 14px; font-size: 14px; }
+  .cat.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+  .pad button { border: 0; background: var(--card); color: var(--text); font-size: 24px; font-weight: 500;
+    padding: 10px 0; border-radius: 14px; }
+  .pad button:active { transform: scale(.96); }
+  .save { width: 100%; margin-top: 14px; border: 0; border-radius: 16px; padding: 16px; font-size: 17px;
+    font-weight: 700; color: #fff; background: var(--brand); }
+  .save:disabled { opacity: .4; }
+
+  /* stats */
+  .card { background: var(--card); border-radius: 20px; padding: 18px; }
+  .donut { display: flex; align-items: center; gap: 18px; }
+  .donut svg { width: 120px; height: 120px; flex-shrink: 0; }
+  .legend { flex: 1; font-size: 13px; }
+  .legend div { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  .dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .legend span:last-child { margin-left: auto; color: var(--muted); }
+  .bar { margin: 14px 0; }
+  .bar .row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; }
+  .bar .track { height: 8px; background: var(--chip); border-radius: 99px; overflow: hidden; }
+  .bar .fill { height: 100%; border-radius: 99px; }
+  .budget-input { display: flex; gap: 8px; margin-top: 12px; }
+  .budget-input input { flex: 1; }
+  .budget-input button { border: 0; border-radius: 12px; padding: 0 16px; background: var(--brand); color: #fff; font-weight: 600; }
+
+  .toast { position: fixed; left: 50%; bottom: 100px; transform: translateX(-50%) translateY(20px);
+    background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 14px;
+    opacity: 0; transition: .25s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HOME -->
+  <section class="view on" id="v-home">
+    <div class="hello" id="greet">Hello 👋</div>
+    <h1>Your money</h1>
+    <div class="balance">
+      <small>Total balance</small>
+      <div class="amt" id="bal">₹0</div>
+      <div class="split">
+        <div><span>↓ Income</span><b id="inc">₹0</b></div>
+        <div><span>↑ Expense</span><b id="exp">₹0</b></div>
+      </div>
+    </div>
+    <div class="section-head">
+      <h2>Recent transactions</h2>
+      <button onclick="go('stats')">See stats</button>
+    </div>
+    <div class="list" id="recent"></div>
+  </section>
+
+  <!-- ADD -->
+  <section class="view" id="v-add">
+    <h1>Add transaction</h1>
+    <div class="seg">
+      <button id="t-exp" class="on" onclick="setType('expense')">Expense</button>
+      <button id="t-inc" onclick="setType('income')">Income</button>
+    </div>
+    <div class="bigamt" id="draft">₹0</div>
+    <input class="note" id="note" placeholder="Note (optional)" maxlength="40" />
+    <div class="cats" id="cats"></div>
+    <div class="pad" id="pad"></div>
+    <button class="save" id="saveBtn" onclick="save()" disabled>Save</button>
+  </section>
+
+  <!-- STATS -->
+  <section class="view" id="v-stats">
+    <h1>This month</h1>
+    <div class="card">
+      <div class="donut">
+        <svg viewBox="0 0 42 42" id="donut"></svg>
+        <div class="legend" id="legend"></div>
+      </div>
+    </div>
+    <div class="section-head"><h2>Monthly budget</h2></div>
+    <div class="card">
+      <div class="bar" style="margin-top:0">
+        <div class="row"><b id="bSpent">₹0 spent</b><span id="bLeft" style="color:var(--muted)"></span></div>
+        <div class="track"><div class="fill" id="bFill" style="width:0;background:var(--brand)"></div></div>
+      </div>
+      <div class="budget-input">
+        <input class="note" style="margin:0" id="budgetIn" type="number" inputmode="numeric" placeholder="Set budget (₹)" />
+        <button onclick="setBudget()">Set</button>
+      </div>
+    </div>
+    <div class="section-head"><h2>All transactions</h2><span class="hello">Tap to delete</span></div>
+    <div class="list" id="all"></div>
+  </section>
+</div>
+
+<nav class="tabs">
+  <button id="n-home" class="on" onclick="go('home')">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home
+  </button>
+  <button class="fab" onclick="go('add')" aria-label="Add transaction">
+    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+  <button id="n-stats" onclick="go('stats')">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats
+  </button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+const CATS = {
+  expense: [["Food","🍔","#f97316"],["Transport","🚕","#0ea5e9"],["Shopping","🛍️","#ec4899"],
+            ["Bills","💡","#eab308"],["Health","💊","#14b8a6"],["Fun","🎬","#8b5cf6"],["Other","📦","#64748b"]],
+  income:  [["Salary","💼","#16a34a"],["Freelance","💻","#22c55e"],["Gift","🎁","#84cc16"],["Other","💰","#64748b"]]
+};
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+let txs = store.get("paisa.tx", null);
+if (!txs) { // sample data so first open is not empty
+  const d = n => new Date(Date.now() - n * 864e5).toISOString();
+  txs = [
+    { id: 1, type: "income", cat: "Salary", amt: 45000, note: "Monthly salary", date: d(6) },
+    { id: 2, type: "expense", cat: "Bills", amt: 2400, note: "Electricity", date: d(4) },
+    { id: 3, type: "expense", cat: "Food", amt: 650, note: "Dinner", date: d(2) },
+    { id: 4, type: "expense", cat: "Transport", amt: 220, note: "Cab", date: d(1) },
+    { id: 5, type: "expense", cat: "Shopping", amt: 1899, note: "Shoes", date: d(0) },
+  ];
+  store.set("paisa.tx", txs);
+}
+let budget = store.get("paisa.budget", 20000);
+let type = "expense", cat = "Food", draft = "";
+
+const fmt = n => "₹" + Math.round(n).toLocaleString("en-IN");
+const $ = id => document.getElementById(id);
+const catInfo = (t, c) => CATS[t].find(x => x[0] === c) || ["Other","📦","#64748b"];
+const thisMonth = t => { const a = new Date(t.date), b = new Date(); return a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear(); };
+
+function rel(iso) {
+  const d = new Date(iso), days = Math.floor((new Date().setHours(0,0,0,0) - new Date(iso).setHours(0,0,0,0)) / 864e5);
+  return days === 0 ? "Today" : days === 1 ? "Yesterday" : d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}
+
+function row(t, del) {
+  const [, icon, color] = catInfo(t.type, t.cat);
+  return `<div class="tx" ${del ? `onclick="remove(${t.id})"` : ""}>
+    <div class="ico" style="background:${color}22">${icon}</div>
+    <div class="meta"><b>${escape(t.note || t.cat)}</b><span>${t.cat} · ${rel(t.date)}</span></div>
+    <div class="val ${t.type === "income" ? "pos" : "neg"}">${t.type === "income" ? "+" : "−"}${fmt(t.amt)}</div></div>`;
+}
+function escape(s) { return s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" })[c]); }
+
+function render() {
+  const sorted = [...txs].sort((a, b) => b.date.localeCompare(a.date));
+  const inc = txs.filter(t => t.type === "income").reduce((s, t) => s + t.amt, 0);
+  const exp = txs.filter(t => t.type === "expense").reduce((s, t) => s + t.amt, 0);
+  $("bal").textContent = fmt(inc - exp); $("inc").textContent = fmt(inc); $("exp").textContent = fmt(exp);
+  const h = new Date().getHours();
+  $("greet").textContent = (h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening") + " 👋";
+  const empty = `<div class="empty">No transactions yet.<br>Tap + to add one.</div>`;
+  $("recent").innerHTML = sorted.slice(0, 5).map(t => row(t)).join("") || empty;
+  $("all").innerHTML = sorted.map(t => row(t, true)).join("") || empty;
+
+  // donut by category (this month expenses)
+  const by = {};
+  txs.filter(t => t.type === "expense" && thisMonth(t)).forEach(t => by[t.cat] = (by[t.cat] || 0) + t.amt);
+  const total = Object.values(by).reduce((a, b) => a + b, 0);
+  let off = 25, arcs = `<circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--chip)" stroke-width="5"/>`;
+  const entries = Object.entries(by).sort((a, b) => b[1] - a[1]);
+  entries.forEach(([c, v]) => {
+    const p = v / total * 100, col = catInfo("expense", c)[2];
+    arcs += `<circle cx="21" cy="21" r="15.9" fill="none" stroke="${col}" stroke-width="5" stroke-dasharray="${p} ${100 - p}" stroke-dashoffset="${off}"/>`;
+    off -= p;
+  });
+  arcs += `<text x="21" y="22.5" text-anchor="middle" font-size="5" font-weight="700" fill="currentColor">${fmt(total)}</text>`;
+  $("donut").innerHTML = arcs;
+  $("legend").innerHTML = entries.map(([c, v]) =>
+    `<div><span class="dot" style="background:${catInfo("expense", c)[2]}"></span><span>${c}</span><span>${Math.round(v / total * 100)}%</span></div>`
+  ).join("") || `<div style="color:var(--muted)">No expenses this month</div>`;
+
+  // budget
+  const pct = budget ? Math.min(100, total / budget * 100) : 0;
+  $("bSpent").textContent = fmt(total) + " spent";
+  $("bLeft").textContent = budget ? `${fmt(Math.max(0, budget - total))} left of ${fmt(budget)}` : "No budget set";
+  $("bFill").style.width = pct + "%";
+  $("bFill").style.background = pct > 90 ? "var(--red)" : pct > 70 ? "#f59e0b" : "var(--brand)";
+}
+
+function go(v) {
+  document.querySelectorAll(".view").forEach(e => e.classList.toggle("on", e.id === "v-" + v));
+  $("n-home").classList.toggle("on", v === "home");
+  $("n-stats").classList.toggle("on", v === "stats");
+  window.scrollTo(0, 0);
+}
+
+function setType(t) {
+  type = t; cat = CATS[t][0][0];
+  $("t-exp").classList.toggle("on", t === "expense");
+  $("t-inc").classList.toggle("on", t === "income");
+  $("draft").style.color = t === "income" ? "var(--green)" : "";
+  renderCats();
+}
+function renderCats() {
+  $("cats").innerHTML = CATS[type].map(([c, i]) =>
+    `<button class="cat ${c === cat ? "on" : ""}" onclick="cat='${c}';renderCats()">${i} ${c}</button>`).join("");
+}
+function key(k) {
+  if (k === "⌫") draft = draft.slice(0, -1);
+  else if (k === ".") { if (!draft.includes(".")) draft = (draft || "0") + "."; }
+  else if (draft.replace(".", "").length < 9 && !/\.\d\d$/.test(draft)) draft = draft === "0" ? k : draft + k;
+  $("draft").textContent = "₹" + (draft ? Number(draft.split(".")[0]).toLocaleString("en-IN") + (draft.includes(".") ? "." + draft.split(".")[1] : "") : "0");
+  $("saveBtn").disabled = !(Number(draft) > 0);
+}
+$("pad").innerHTML = ["1","2","3","4","5","6","7","8","9",".","0","⌫"].map(k => `<button onclick="key('${k}')">${k}</button>`).join("");
+
+function save() {
+  const amt = Number(draft); if (!(amt > 0)) return;
+  txs.push({ id: Date.now(), type, cat, amt, note: $("note").value.trim(), date: new Date().toISOString() });
+  store.set("paisa.tx", txs);
+  draft = ""; $("note").value = ""; key("");  key("⌫");
+  render(); go("home"); toast(type === "income" ? "Income added ✅" : "Expense added ✅");
+}
+function remove(id) {
+  const t = txs.find(x => x.id === id);
+  if (!t || !confirm(`Delete "${t.note || t.cat}" (${fmt(t.amt)})?`)) return;
+  txs = txs.filter(x => x.id !== id); store.set("paisa.tx", txs); render(); toast("Deleted");
+}
+function setBudget() {
+  const v = Number($("budgetIn").value); if (!(v >= 0)) return;
+  budget = v; store.set("paisa.budget", v); $("budgetIn").value = ""; render(); toast("Budget updated");
+}
+function toast(m) { const t = $("toast"); t.textContent = m; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 1600); }
+
+setType("expense"); render();
+</script>
+</body>
+</html>
