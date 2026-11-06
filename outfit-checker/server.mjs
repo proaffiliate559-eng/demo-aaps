@@ -18,7 +18,7 @@ try {
 const PORT = Number(process.env.PORT ?? 3000);
 const API_KEY = process.env.GEMINI_API_KEY ?? "";
 const MOCK = (process.env.AI_MODE ?? "").toLowerCase() === "mock";
-const TEXT_MODELS = (process.env.GEMINI_MODEL ?? "gemini-3.5-flash,gemini-3.5-flash-lite").split(",").map((s) => s.trim()).filter(Boolean);
+const TEXT_MODELS = (process.env.GEMINI_MODEL ?? "gemini-3.5-flash,gemini-3.5-flash-lite,gemini-flash-latest,gemini-2.5-flash").split(",").map((s) => s.trim()).filter(Boolean);
 const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL ?? "gemini-3.1-flash-image";
 const LIMIT_PER_HOUR = Number(process.env.RATE_LIMIT_PER_HOUR ?? 30);
 const MAX_BODY = 7 * 1024 * 1024;

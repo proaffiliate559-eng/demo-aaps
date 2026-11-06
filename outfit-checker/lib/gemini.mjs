@@ -13,6 +13,9 @@ export class AppError extends Error {
 function mapHttpError(status, body) {
   const detail = body?.error?.message?.slice(0, 200) ?? "";
   console.error(`[gemini] HTTP ${status} ${detail}`);
+  if (status === 429 && /limit: 0\b|billing/i.test(detail)) {
+    return new AppError(402, "quota", "Is AI feature ke liye Google AI account par billing on karni hogi (free tier mein quota nahi hai).");
+  }
   if (status === 429) return new AppError(429, "busy", "AI abhi busy hai, 1 minute baad try karo.");
   if (status === 401 || status === 403) return new AppError(503, "not_configured", "AI key sahi set nahi hai (GEMINI_API_KEY check karo).");
   if (status === 400) return new AppError(422, "bad_request", "AI ye photo process nahi kar paya. Doosri photo try karo.");
@@ -77,7 +80,7 @@ export async function generateJson({ models, system, prompt, image, schema, ...o
       }
     } catch (e) {
       last = e;
-      if (!(e instanceof AppError) || !["unavailable", "busy", "invalid"].includes(e.code)) throw e;
+      if (!(e instanceof AppError) || !["unavailable", "busy", "invalid", "quota"].includes(e.code)) throw e;
     }
   }
   throw last;
