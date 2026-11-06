@@ -1,0 +1,14 @@
+{
+  "name": "outfit-checker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Photo upload karo, mood chuno: AI outfit check + suggestion + realistic try-on photo.",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs",
+    "demo": "AI_MODE=mock node server.mjs",
+    "test": "node --test test/*.test.mjs"
+  }
+}

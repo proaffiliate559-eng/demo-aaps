@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Outfit Checker</title>
+  <meta name="description" content="Apni photo upload karo, mood chuno — AI batayega kya pehno, aur tumhari hi photo par naya outfit dikhayega." />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-inner">
+      <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">✦</span> Outfit Checker</a>
+      <span class="pill" id="ai-status" hidden></span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>Aaj kya pehnu? <em>AI se pucho.</em></h1>
+      <p>Apni photo daalo, mood chuno. Hum tumhare current outfit ko score karenge, ek better look suggest karenge, aur <strong>tumhari hi photo par</strong> naya outfit pehna ke dikhayenge.</p>
+    </section>
+
+    <form id="check-form" class="card form" novalidate>
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-head"><span class="step-num">1</span><h2>Apni photo upload karo</h2></div>
+
+        <div class="upload" id="dropzone">
+          <img id="preview" alt="Tumhari uploaded photo" hidden />
+          <div class="upload-empty" id="upload-empty">
+            <div class="upload-icon" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+            </div>
+            <p><strong>Photo yahan drop karo</strong> ya neeche se choose karo</p>
+            <p class="muted small">Best result: poori body ya kamar tak, achhi roshni, akele tum. JPG / PNG / WEBP.</p>
+          </div>
+        </div>
+        <div class="upload-actions">
+          <label class="btn btn-ghost">
+            <input type="file" id="file" accept="image/jpeg,image/png,image/webp" hidden />
+            Gallery se choose karo
+          </label>
+          <label class="btn btn-ghost only-touch">
+            <input type="file" id="camera" accept="image/*" capture="user" hidden />
+            Selfie lo
+          </label>
+          <button type="button" class="btn btn-link" id="remove-photo" hidden>Photo hatao</button>
+        </div>
+
+        <label class="consent">
+          <input type="checkbox" id="consent" />
+          <span>Main confirm karta/karti hoon ki ye <strong>meri apni photo</strong> hai (18+), aur main ise AI processing (Google Gemini) ke liye bhejne ki permission deta/deti hoon. Photo save nahi hoti.</span>
+        </label>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-head"><span class="step-num">2</span><h2>Mood / occasion kya hai?</h2></div>
+        <div class="moods" role="radiogroup" aria-label="Mood">
+          <label class="mood"><input type="radio" name="mood" value="date" /><span class="mood-emoji" aria-hidden="true">🌹</span><span class="mood-title">Date night</span><span class="mood-sub">Dinner, coffee date</span></label>
+          <label class="mood"><input type="radio" name="mood" value="friends" /><span class="mood-emoji" aria-hidden="true">🛍️</span><span class="mood-title">Friends ke saath</span><span class="mood-sub">Cafe, mall, ghumna</span></label>
+          <label class="mood"><input type="radio" name="mood" value="party" /><span class="mood-emoji" aria-hidden="true">✨</span><span class="mood-title">Party / Wedding</span><span class="mood-sub">Shaadi, festive, club</span></label>
+          <label class="mood"><input type="radio" name="mood" value="office" /><span class="mood-emoji" aria-hidden="true">💼</span><span class="mood-title">Office / Interview</span><span class="mood-sub">Formal, smart casual</span></label>
+        </div>
+
+        <details class="more">
+          <summary>Aur details (optional)</summary>
+          <div class="more-grid">
+            <fieldset>
+              <legend>Mausam</legend>
+              <div class="chips">
+                <label class="chip"><input type="radio" name="weather" value="hot" />☀️ Garmi</label>
+                <label class="chip"><input type="radio" name="weather" value="mild" checked />🌤️ Normal</label>
+                <label class="chip"><input type="radio" name="weather" value="cold" />❄️ Sardi</label>
+                <label class="chip"><input type="radio" name="weather" value="rainy" />🌧️ Baarish</label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>Kapdon ka style</legend>
+              <div class="chips">
+                <label class="chip"><input type="radio" name="styleFor" value="auto" checked />Auto</label>
+                <label class="chip"><input type="radio" name="styleFor" value="men" />Men</label>
+                <label class="chip"><input type="radio" name="styleFor" value="women" />Women</label>
+                <label class="chip"><input type="radio" name="styleFor" value="unisex" />Unisex</label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>Budget</legend>
+              <div class="chips">
+                <label class="chip"><input type="radio" name="budget" value="low" />₹2k tak</label>
+                <label class="chip"><input type="radio" name="budget" value="mid" checked />₹2k–6k</label>
+                <label class="chip"><input type="radio" name="budget" value="high" />₹6k+</label>
+              </div>
+            </fieldset>
+            <label class="note">
+              <span>Kuch aur? <span class="muted">(jaise “black pasand hai”, “kurta chahiye”)</span></span>
+              <input type="text" id="note" maxlength="200" placeholder="Optional" />
+            </label>
+          </div>
+        </details>
+      </div>
+
+      <p class="form-error" id="form-error" role="alert" hidden></p>
+      <button type="submit" class="btn btn-primary btn-lg" id="submit">Outfit check karo</button>
+    </form>
+
+    <!-- Results -->
+    <section id="results" class="results" hidden aria-live="polite">
+      <div class="card loading" id="loading" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p id="loading-text">Tumhara look dekh rahe hain…</p>
+      </div>
+
+      <div id="result-body" hidden>
+        <div class="banner" id="mock-banner" hidden>Demo mode: ye asli AI result nahi hai. Real result ke liye server par <code>GEMINI_API_KEY</code> set karo.</div>
+        <div class="banner banner-warn" id="photo-issue" hidden></div>
+
+        <div class="grid-2">
+          <article class="card score-card">
+            <h2 class="eyebrow">Current outfit check</h2>
+            <div class="score-row">
+              <div class="score-ring" id="score-ring"><span id="score">–</span><small>/10</small></div>
+              <div>
+                <p class="verdict" id="verdict"></p>
+                <p class="muted small" id="current-desc"></p>
+              </div>
+            </div>
+            <div class="two-lists">
+              <div><h3>👍 Kya achha hai</h3><ul id="works"></ul></div>
+              <div><h3>🔧 Kya improve karo</h3><ul id="improve"></ul></div>
+            </div>
+          </article>
+
+          <article class="card look-card">
+            <h2 class="eyebrow">Suggested look</h2>
+            <h3 class="look-title" id="look-title"></h3>
+            <p class="muted" id="look-vibe"></p>
+            <div class="swatches" id="swatches"></div>
+            <ul class="pieces" id="pieces"></ul>
+            <p class="total" id="total"></p>
+            <p id="why"></p>
+            <p class="tip" id="grooming"></p>
+          </article>
+        </div>
+
+        <article class="card tryon">
+          <div class="tryon-head">
+            <div>
+              <h2 class="eyebrow">Tum is outfit mein</h2>
+              <p class="muted small">AI tumhari photo mein sirf kapde badalta hai — chehra, pose aur background wahi rehte hain.</p>
+            </div>
+          </div>
+          <div class="compare">
+            <figure>
+              <img id="before-img" alt="Original photo" />
+              <figcaption>Pehle</figcaption>
+            </figure>
+            <figure class="after">
+              <div class="after-frame" id="after-frame">
+                <div class="skeleton" id="tryon-loading"><div class="spinner" aria-hidden="true"></div><span>Realistic photo ban rahi hai… (20–60 sec)</span></div>
+                <img id="after-img" alt="AI preview: tum suggested outfit mein" hidden />
+                <span class="ai-badge" id="ai-badge" hidden>AI preview</span>
+              </div>
+              <figcaption>AI try-on</figcaption>
+            </figure>
+          </div>
+          <p class="form-error" id="tryon-error" role="alert" hidden></p>
+          <div class="tryon-actions">
+            <a class="btn btn-primary" id="download" download="outfit-checker-look.png" hidden>Download</a>
+            <button type="button" class="btn btn-ghost" id="regen-photo" hidden>Photo dobara banao</button>
+            <button type="button" class="btn btn-ghost" id="new-look">Doosra look suggest karo</button>
+            <button type="button" class="btn btn-link" id="start-over">Shuru se</button>
+          </div>
+        </article>
+      </div>
+
+      <div class="card" id="result-error" hidden>
+        <p class="form-error" id="result-error-text" role="alert"></p>
+        <button type="button" class="btn btn-ghost" id="retry">Dobara try karo</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>🔒 Tumhari photo hamare server par save nahi hoti — sirf AI processing ke liye Google Gemini ko bheji jaati hai. Try-on image AI se bani hai, asli nahi; prices andaaza hain.</p>
+  </footer>
+</body>
+</html>
