@@ -1,0 +1,281 @@
+:root {
+  --indigo: #3B2F8F;
+  --indigo-dark: #2C2370;
+  --saffron: #F59E0B;
+  --saffron-dark: #D97706;
+  --green: #10B981;
+  --bg-light: #F3F1FF;
+  --text: #1F1B3A;
+  --muted: #5B5675;
+  --white: #FFFFFF;
+  --radius: 16px;
+  --shadow: 0 4px 20px rgba(59, 47, 143, 0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--white);
+  padding-bottom: 88px; /* space for sticky mobile CTA */
+}
+
+h1, h2, h3 {
+  font-family: "Poppins", system-ui, sans-serif;
+  line-height: 1.25;
+  margin: 0 0 12px;
+  color: var(--text);
+}
+h1 { font-size: 1.85rem; font-weight: 700; }
+h2 { font-size: 1.5rem; font-weight: 700; text-align: center; margin-bottom: 24px; }
+h3 { font-size: 1.05rem; font-weight: 600; }
+p { margin: 0 0 12px; }
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--indigo); }
+
+.container { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+.narrow { max-width: 720px; }
+.section { padding: 56px 0; }
+.section-alt { background: var(--bg-light); }
+.center { text-align: center; }
+.muted { color: var(--muted); }
+.small { font-size: 0.9rem; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-block;
+  min-height: 56px;
+  padding: 16px 28px;
+  border-radius: 12px;
+  background: var(--saffron);
+  color: var(--text);
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
+  transition: background 0.15s;
+}
+.btn:hover, .btn:focus-visible { background: var(--saffron-dark); }
+.btn-block { display: block; width: 100%; }
+.btn-hero { display: block; width: 100%; }
+.btn-indigo { background: var(--indigo); color: var(--white); box-shadow: 0 6px 16px rgba(59, 47, 143, 0.3); }
+.btn-indigo:hover, .btn-indigo:focus-visible { background: var(--indigo-dark); }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+.grid { display: grid; gap: 16px; }
+
+/* ---------- Hero ---------- */
+.hero { background: var(--bg-light); padding: 40px 0 56px; }
+.hero-inner { display: grid; gap: 32px; align-items: center; }
+.badge {
+  display: inline-block;
+  background: var(--white);
+  color: var(--indigo);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+.hero .sub { font-size: 1.1rem; color: var(--muted); margin-bottom: 24px; }
+.cta-note { font-size: 0.95rem; color: var(--muted); margin: 10px 0 4px; }
+.trust { font-size: 0.9rem; color: var(--muted); }
+.cover { max-width: 340px; margin: 0 auto; border-radius: var(--radius); box-shadow: 0 20px 40px rgba(59, 47, 143, 0.2); }
+
+/* ---------- Problem ---------- */
+.pain-card { display: flex; gap: 14px; align-items: flex-start; }
+.icon {
+  flex: 0 0 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--bg-light);
+  color: var(--indigo);
+}
+.icon svg { width: 24px; height: 24px; }
+.pain-card p { margin: 0; font-weight: 500; }
+
+/* ---------- Solution ---------- */
+.split { display: flex; gap: 12px; margin: 24px 0 8px; }
+.split div { flex: 1; border-radius: var(--radius); padding: 16px; text-align: center; }
+.split .s30 { background: var(--bg-light); }
+.split .s70 { background: var(--indigo); color: var(--white); flex: 2.3; }
+.split strong { display: block; font-family: "Poppins", sans-serif; font-size: 1.6rem; }
+
+/* ---------- Accordion (details/summary) ---------- */
+details {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+}
+summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 18px 48px 18px 20px;
+  position: relative;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  min-height: 56px;
+}
+summary::-webkit-details-marker { display: none; }
+summary::after {
+  content: "+";
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  color: var(--indigo);
+}
+details[open] summary::after { content: "−"; }
+details > p { padding: 0 20px 18px; margin: 0; color: var(--muted); }
+.ch-num { color: var(--saffron-dark); margin-right: 6px; }
+.bonus summary { color: var(--indigo); }
+.bonus { border: 2px dashed var(--saffron); }
+
+/* ---------- Checklist ---------- */
+.checklist { list-style: none; padding: 0; margin: 0; }
+.checklist li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-bottom: 1px solid #E7E4F7;
+  font-weight: 500;
+}
+.checklist li:last-child { border-bottom: 0; }
+.tick {
+  flex: 0 0 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--green);
+  color: var(--white);
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.cross { background: #EF4444; }
+
+/* ---------- Preview scroller ---------- */
+.scroller {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 4px 16px 16px;
+  margin: 0 -16px;
+  -webkit-overflow-scrolling: touch;
+}
+.scroller img {
+  flex: 0 0 75%;
+  max-width: 280px;
+  scroll-snap-align: center;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background: var(--white);
+}
+
+/* ---------- For / Not for ---------- */
+.fit h3 { margin-bottom: 8px; }
+.fit .checklist li { font-weight: 400; }
+
+/* ---------- Author ---------- */
+.author { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; }
+.author img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; box-shadow: var(--shadow); }
+.placeholder { background: #FFF7E6; border: 1px dashed var(--saffron); border-radius: 8px; padding: 2px 6px; }
+
+/* ---------- Reviews: section auto-hides until a .review-card is added ---------- */
+.reviews:not(:has(.review-card)) { display: none; }
+.review-card p { font-style: italic; }
+.review-card .who { font-weight: 600; font-style: normal; color: var(--indigo); margin: 0; }
+
+/* ---------- Pricing ---------- */
+.price-card {
+  max-width: 440px;
+  margin: 0 auto;
+  border: 2px solid var(--indigo);
+  text-align: center;
+  padding: 28px 20px;
+}
+.offer-tag {
+  display: inline-block;
+  background: var(--saffron);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 4px 14px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+}
+.price { font-family: "Poppins", sans-serif; margin: 8px 0 20px; }
+.price s { color: var(--muted); font-size: 1.4rem; margin-right: 10px; }
+.price strong { font-size: 3rem; color: var(--indigo); }
+.price-card .checklist { text-align: left; margin-bottom: 24px; }
+
+/* ---------- Final CTA ---------- */
+.final { background: var(--indigo); color: var(--white); text-align: center; }
+.final h2 { color: var(--white); }
+
+/* ---------- Footer ---------- */
+footer { background: var(--text); color: #CFCBE6; padding: 40px 0 24px; font-size: 0.95rem; }
+footer a { color: #FFFFFF; text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 16px; }
+.footer-links a { display: inline-block; padding: 6px 0; }
+footer p { margin: 4px 0; }
+
+/* ---------- Sticky mobile CTA ---------- */
+.sticky-cta {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 -4px 16px rgba(31, 27, 58, 0.1);
+}
+
+/* ---------- Simple inner pages ---------- */
+.page-header { background: var(--bg-light); padding: 16px 0; }
+.page-header a { font-weight: 600; text-decoration: none; }
+.legal { padding: 40px 0 56px; }
+.legal h1 { font-size: 1.6rem; }
+.legal h2 { text-align: left; font-size: 1.15rem; margin: 28px 0 8px; }
+.legal ul { padding-left: 20px; }
+
+/* ---------- Desktop ---------- */
+@media (min-width: 768px) {
+  body { padding-bottom: 0; }
+  .sticky-cta { display: none; }
+  h1 { font-size: 2.6rem; }
+  h2 { font-size: 2rem; }
+  .section { padding: 80px 0; }
+  .hero { padding: 72px 0 80px; }
+  .hero-inner { grid-template-columns: 1.2fr 1fr; gap: 48px; }
+  .btn-hero { display: inline-block; width: auto; min-width: 320px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .scroller { justify-content: center; margin: 0; padding: 4px 0 16px; }
+  .scroller img { flex-basis: 280px; }
+  .author { flex-direction: row; text-align: left; }
+}
+body.inner-page { padding-bottom: 0; }
+.tick-lg { width: 64px; height: 64px; font-size: 2rem; margin: 0 auto 20px; }
+.download-btn { max-width: 360px; margin: 24px auto; }
