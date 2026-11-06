@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [caferepeat-ai]
+  pull_request:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash   # bash -eo pipefail: a failing command inside a pipe fails the step
+
+jobs:
+  app:
+    name: Typecheck, lint, unit tests, build
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-key
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      QR_TOKEN_SECRET: ci-only-secret-0123456789abcdefghijklmnop
+      CRON_SECRET: ci-only-cron-secret
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-audit --no-fund
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests
+        run: npm test
+      - name: Build
+        run: npm run build
+
+  database:
+    name: Migrations + RLS/ledger tests (PostgreSQL 16)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGPASSWORD: postgres
+      DB: postgresql://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply stub, migrations and seed
+        run: |
+          psql "$DB" -v ON_ERROR_STOP=1 -q -f supabase/tests/00_supabase_stub.sql
+          for f in supabase/migrations/*.sql; do echo "== $f"; psql "$DB" -v ON_ERROR_STOP=1 -q -f "$f"; done
+          psql "$DB" -v ON_ERROR_STOP=1 -q -f supabase/seed.sql
+      - name: RLS, ledger and redemption tests
+        run: psql "$DB" -v ON_ERROR_STOP=1 -qtA -f supabase/tests/01_loyalty_rls_test.sql | grep -E '^(ok|ALL|FAIL)' || exit 1
+      - name: Concurrency tests
+        run: PSQL="psql $DB" bash supabase/tests/02_concurrency_test.sh
