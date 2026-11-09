@@ -594,17 +594,20 @@ create table public.audit_logs (
 );
 create index audit_logs_tenant_idx on public.audit_logs (tenant_id, created_at desc);
 
+-- The tables this app owns. Loops below touch only these, never other
+-- tables that may already exist in the project's public schema.
+create or replace function private.app_tables()
+returns text[] language sql immutable as $$
+  select array['subscription_plans', 'tenants', 'branches', 'users', 'user_roles', 'staff_members', 'qr_codes', 'customers', 'customer_consents', 'qr_scans', 'loyalty_programs', 'loyalty_rules', 'loyalty_wallets', 'rewards', 'reward_redemptions', 'coupons', 'purchases', 'coupon_redemptions', 'visits', 'loyalty_transactions', 'referrals', 'feedback', 'whatsapp_templates', 'campaigns', 'campaign_recipients', 'whatsapp_messages', 'ai_insights', 'subscriptions', 'payments', 'support_tickets', 'audit_logs']
+$$;
+
 -- ---------------------------------------------------------------------------
--- updated_at triggers on every table
+-- updated_at triggers on every app table
 -- ---------------------------------------------------------------------------
 do $$
 declare t text;
 begin
-  for t in
-    select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
-    where n.nspname = 'public' and c.relkind = 'r'
-      and exists (select 1 from information_schema.columns
-                  where table_schema = 'public' and table_name = c.relname and column_name = 'updated_at')
+  foreach t in array private.app_tables()
   loop
     execute format('create trigger %I before update on public.%I for each row execute function private.touch_updated_at()', t || '_touch', t);
   end loop;

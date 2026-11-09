@@ -842,10 +842,24 @@ end $$;
 -- ---------------------------------------------------------------------------
 -- Function privileges
 -- ---------------------------------------------------------------------------
-revoke execute on all functions in schema public from public, anon, authenticated;
+-- Only this app's functions (other functions in the project are left alone).
+do $$
+declare f regprocedure;
+begin
+  for f in
+    select p.oid::regprocedure from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.proname = any(array[
+      'get_public_tenant','track_qr_scan','register_customer','update_my_profile','set_my_consent',
+      'submit_feedback','get_my_card','request_redemption','cancel_my_redemption','staff_register_customer',
+      'record_purchase','confirm_redemption','adjust_balance','create_tenant','create_qr_code',
+      'job_expire_redemptions','job_birthday_rewards','job_expire_points'])
+  loop
+    execute format('revoke execute on function %s from public, anon, authenticated', f);
+  end loop;
+end $$;
 revoke execute on all functions in schema private from public, anon, authenticated;
 grant execute on function
-  private.role_perms(public.app_role), private.is_platform_admin(), private.my_role(uuid),
+  private.app_tables(), private.role_perms(public.app_role), private.is_platform_admin(), private.my_role(uuid),
   private.is_member(uuid), private.has_perm(uuid, text), private.can_use_branch(uuid, uuid),
   private.my_customer_ids(), private.is_customer_of(uuid)
 to anon, authenticated;

@@ -122,14 +122,20 @@ grant usage on schema public to anon, authenticated, service_role;
 grant usage on schema private to anon, authenticated, service_role;
 revoke all on all functions in schema private from public;
 grant execute on function
-  private.role_perms(public.app_role), private.is_platform_admin(), private.my_role(uuid),
+  private.app_tables(), private.role_perms(public.app_role), private.is_platform_admin(), private.my_role(uuid),
   private.is_member(uuid), private.has_perm(uuid, text), private.can_use_branch(uuid, uuid),
   private.my_customer_ids(), private.is_customer_of(uuid)
 to anon, authenticated, service_role;
 
-grant select, insert, update, delete on all tables in schema public to authenticated;
+do $$
+declare t text;
+begin
+  foreach t in array private.app_tables() loop
+    execute format('grant select, insert, update, delete on public.%I to authenticated', t);
+    execute format('grant all on public.%I to service_role', t);
+  end loop;
+end $$;
 grant select on public.subscription_plans to anon;
-grant all on all tables in schema public to service_role;
 
 -- Ledger-type tables: no direct writes from clients at all (functions only).
 revoke insert, update, delete on
@@ -146,7 +152,7 @@ grant update (name, logo_url, brand_color, timezone, contact_phone, contact_emai
 do $$
 declare t text;
 begin
-  for t in select tablename from pg_tables where schemaname = 'public' loop
+  foreach t in array private.app_tables() loop
     execute format('alter table public.%I enable row level security', t);
   end loop;
 end $$;
@@ -155,7 +161,7 @@ end $$;
 do $$
 declare t text;
 begin
-  for t in select tablename from pg_tables where schemaname = 'public' loop
+  foreach t in array private.app_tables() loop
     execute format('create policy %I on public.%I for select to authenticated using (private.is_platform_admin())', 'platform_admin_read', t);
   end loop;
 end $$;
